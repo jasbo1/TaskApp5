@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
@@ -20,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.taskapp.R;
 import com.taskapp.Task;
 import com.taskapp.TaskAdapter;
+import com.taskapp.interfaces.OnItemClickListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +45,14 @@ public class HomeFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new TaskAdapter(list);
         recyclerView.setAdapter(adapter);
+        adapter.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(int position) {
+
+                Task task=list.get(position);
+                Toast.makeText(getContext(),task.getTitle(),Toast.LENGTH_SHORT).show();
+            }
+        });
 
     }
 

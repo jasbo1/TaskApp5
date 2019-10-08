@@ -1,30 +1,49 @@
 package com.taskapp;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 
+import android.os.Environment;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
-import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+
 import com.google.android.material.navigation.NavigationView;
+import com.taskapp.onboard.OnBoardActivity;
 
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+
+
 import android.view.Menu;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.spi.FileTypeDetector;
+
+import pub.devrel.easypermissions.EasyPermissions;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,6 +52,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        SharedPreferences preferences = getSharedPreferences("setting",MODE_PRIVATE);
+        boolean isShown = preferences.getBoolean("isShown",false);
+        if(!isShown){
+            startActivity(new Intent(this, OnBoardActivity.class));
+            finish();
+            return;
+        }
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -55,13 +82,58 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+        initFile();
     }
+    private void initFile() {
+
+        final File folder = new File(Environment.getExternalStorageDirectory(),"TaskApp");
+       // final File folder = new File(getExternalCacheDir(), "TaskApp");
+        folder.mkdir();
+        File file = new File(folder, "note.txt");
+        try {
+            file.createNewFile();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Thread thread =new Thread(new Runnable() {
+            @Override
+            public void run() {
+                File file = new File(folder, "image.jpg");
+
+                try {
+                    FileUtils.copyURLToFile(new URL("https://www.expatolife.com/wp-content/uploads/2019/03/street-art-1270039_1280.jpg"), file);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        thread.start();
+
+      /*  EasyPermissions.requestPermissions(this, "Для записи нужно разрешение",
+                199, Manifest.permission.WRITE_EXTERNAL_STORAGE);*/
+    }
+
+
+
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if(item.getItemId()==R.id.action_clear) {
+            SharedPreferences preferences = getSharedPreferences("setting", Context.MODE_PRIVATE);
+            preferences.edit().clear().apply();
+            finish();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
