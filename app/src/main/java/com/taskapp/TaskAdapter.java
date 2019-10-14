@@ -3,6 +3,8 @@ package com.taskapp;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -14,8 +16,11 @@ import java.util.List;
 
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
 
-    private List<Task> list;
+    public List<Task> list;
     private OnItemClickListener onItemClickListener;
+
+    private AdapterView.OnItemLongClickListener onItemLongClickListener;
+
 
     public TaskAdapter(List<Task> list) {
         this.list = list;
@@ -34,7 +39,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
     }
 
 
-
     @Override
     public int getItemCount() {
         return list.size();
@@ -48,11 +52,13 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
 
         private TextView textTitle;
         private TextView textDesc;
+        private CheckBox checkBox;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             textTitle = itemView.findViewById(R.id.textTitle);
             textDesc = itemView.findViewById(R.id.textDesc);
+            checkBox = itemView.findViewById(R.id.checkbox);
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -60,11 +66,24 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
 
                 }
             });
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    onItemClickListener.onItemLongClick(getAdapterPosition());
+
+                    return true;
+                }
+            });
         }
 
         public void bind(Task task) {
             textTitle.setText(task.getTitle());
             textDesc.setText(task.getDesc());
+            final CheckBox checkBox = (CheckBox) itemView.findViewById(R.id.checkbox);
+            if (checkBox.isChecked()) {
+                checkBox.setChecked(false);
+            }
+
 
         }
     }

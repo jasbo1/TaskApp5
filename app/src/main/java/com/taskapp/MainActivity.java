@@ -15,6 +15,7 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -24,12 +25,13 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.navigation.NavigationView;
 import com.taskapp.onboard.OnBoardActivity;
+import com.taskapp.ui.home.HomeFragment;
 
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 
 import android.view.Menu;
@@ -42,10 +44,16 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.spi.FileTypeDetector;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import pub.devrel.easypermissions.EasyPermissions;
 
 public class MainActivity extends AppCompatActivity {
+    TaskAdapter adapter;
+    List<Task> list;
 
     private AppBarConfiguration mAppBarConfiguration;
 
@@ -53,9 +61,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        SharedPreferences preferences = getSharedPreferences("setting",MODE_PRIVATE);
-        boolean isShown = preferences.getBoolean("isShown",false);
-        if(!isShown){
+        SharedPreferences preferences = getSharedPreferences("setting", MODE_PRIVATE);
+        boolean isShown = preferences.getBoolean("isShown", false);
+        if (!isShown) {
             startActivity(new Intent(this, OnBoardActivity.class));
             finish();
             return;
@@ -76,18 +84,24 @@ public class MainActivity extends AppCompatActivity {
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow,
-                R.id.nav_tools, R.id.nav_share, R.id.nav_send)
+                R.id.nav_tools, R.id.nav_share, R.id.nav_send ,R.id.nav_anime)
                 .setDrawerLayout(drawer)
                 .build();
+
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
-        initFile();
+        list = App.getInstance().getDatabase().taskDao().getAll();
+        adapter = new TaskAdapter(list);
+
+
+        //initFile();
     }
+
     private void initFile() {
 
-        final File folder = new File(Environment.getExternalStorageDirectory(),"TaskApp");
-       // final File folder = new File(getExternalCacheDir(), "TaskApp");
+        final File folder = new File(Environment.getExternalStorageDirectory(), "TaskApp");
+
         folder.mkdir();
         File file = new File(folder, "note.txt");
         try {
@@ -96,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Thread thread =new Thread(new Runnable() {
+        Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 File file = new File(folder, "image.jpg");
@@ -110,14 +124,8 @@ public class MainActivity extends AppCompatActivity {
         });
         thread.start();
 
-      /*  EasyPermissions.requestPermissions(this, "Для записи нужно разрешение",
-                199, Manifest.permission.WRITE_EXTERNAL_STORAGE);*/
+
     }
-
-
-
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -128,13 +136,25 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if(item.getItemId()==R.id.action_clear) {
-            SharedPreferences preferences = getSharedPreferences("setting", Context.MODE_PRIVATE);
-            preferences.edit().clear().apply();
-            finish();
+        switch ((item.getItemId())){
+            case R.id.action_clear:
+                SharedPreferences preferences = getSharedPreferences("setting", MODE_PRIVATE);
+                preferences.edit().clear().apply();
+                finish();
+                   break;
+                case  R.id.action_sort:
+                    Fragment navHostFragment = getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
+                    ((HomeFragment) navHostFragment.getChildFragmentManager().getFragments().get(0)).sortList();
+                    Collections.reverse(list);
+
+                    break;
+
         }
+
         return super.onOptionsItemSelected(item);
     }
+
+
 
     @Override
     public boolean onSupportNavigateUp() {

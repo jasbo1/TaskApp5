@@ -12,18 +12,32 @@
         android:id="@+id/editTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        style="@style/EditTextStyle"
         android:hint="Title" />
 
     <EditText
         android:id="@+id/editDesc"
+        style="@style/EditTextStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Desc" />
 
     <Button
         android:layout_width="match_parent"
+        android:id="@+id/button_red"
         android:layout_height="wrap_content"
+        android:background="@drawable/button"
+
+        android:textColor="#fff"
         android:onClick="onClick"
         android:text="save" />
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:layout_editor_absoluteX="363dp"
+        tools:layout_editor_absoluteY="16dp"
+        android:focusable="false"
+        android:onClick="onCheckBoxClick"/>
 
 </LinearLayout>
